@@ -26,6 +26,6 @@ def compile_cv_data():
     
     return cv_combined
 
-
+# pulls in the data and writes to disk if desired
 cv_data = compile_cv_data()
 cv_data.to_csv('./data/coronavirus_data.csv', index=False)

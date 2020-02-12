@@ -26,7 +26,6 @@ get_cv_data <- function(dataset_url, status) {
 # this function pulls all 3 urls and combines them into one tidy object with clean column names
 # takes no input parameters
 compile_cv_data <- function() {
-
 cv_confirmed <- get_cv_data(confirmed_url, 'Confirmed')
 cv_recovered <- get_cv_data(recovered_url, 'Recovered')
 cv_deaths <- get_cv_data(confirmed_url, 'Deaths')
@@ -36,7 +35,6 @@ cv_combined <- janitor::clean_names(cv_combined)
 cv_combined[, date := lubridate::mdy_hm(date)]
 cv_combined[is.na(count), count := 0]
 return(cv_combined)
-
 }
 
 # this adds a CRS to the cv_object and turns it to a simple features object
