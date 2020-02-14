@@ -28,7 +28,7 @@ get_cv_data <- function(dataset_url, status) {
 compile_cv_data <- function() {
   cv_confirmed <- get_cv_data(confirmed_url, 'Confirmed')
   cv_recovered <- get_cv_data(recovered_url, 'Recovered')
-  cv_deaths <- get_cv_data(confirmed_url, 'Deaths')
+  cv_deaths <- get_cv_data(deaths_url, 'Deaths')
   
   cv_combined <- dplyr::bind_rows(cv_confirmed, cv_recovered, cv_deaths)
   cv_combined <- janitor::clean_names(cv_combined)
