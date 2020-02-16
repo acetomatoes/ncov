@@ -8,9 +8,9 @@ library(sf)
 library(sp)
 
 # define the urls for the three conditions from which we'll pull in the data
-confirmed_url <- 'https://raw.githubusercontent.com/CSSEGISandData/2019-nCoV/master/time_series/time_series_2019-ncov-Confirmed.csv'
-deaths_url <- 'https://raw.githubusercontent.com/CSSEGISandData/2019-nCoV/master/time_series/time_series_2019-ncov-Deaths.csv'
-recovered_url <- 'https://raw.githubusercontent.com/CSSEGISandData/2019-nCoV/master/time_series/time_series_2019-ncov-Recovered.csv'
+confirmed_url <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
+deaths_url <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
+recovered_url <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv'
 
 # this function pulls the data from individual url
 #the 'status' paramter creates a new column in the data
@@ -32,7 +32,7 @@ compile_cv_data <- function() {
   
   cv_combined <- dplyr::bind_rows(cv_confirmed, cv_recovered, cv_deaths)
   cv_combined <- janitor::clean_names(cv_combined)
-  cv_combined[, date := lubridate::mdy_hm(date)]
+  cv_combined[, date := lubridate::mdy(date)]
   cv_combined[is.na(count), count := 0]
   return(cv_combined)
 }
@@ -47,8 +47,8 @@ cv_to_sf <- function(cv_data) {
 
 # get the data in a tidy format and write to disk if desired
 cv_data <- compile_cv_data()
-fwrite(cv_data, "./data/coronavirus_data.csv")
+data.table::fwrite(cv_data, "./data/coronavirus_data.csv")
 
 # convert to a simple features object and write out as geojson if that's your preferred format
 cv_sf <- cv_to_sf(cv_data)
-st_write(cv_sf, "./data/coronavirus_data.geojson")
+sf::st_write(cv_sf, "./data/coronavirus_data.geojson")
