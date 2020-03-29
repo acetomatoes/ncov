@@ -39,8 +39,7 @@ compile_cv_data <- function() {
 
 # this adds a CRS to the cv_object and turns it to a simple features object
 cv_to_sf <- function(cv_data) {
-  cv_sf <- sf::st_as_sf(cv_data, coords = c("lat", "long"), crs = 4326)
-  
+  cv_sf <- sf::st_as_sf(cv_data, coords = c("long", "lat"), crs = "+proj=longlat +ellps=WGS84 +datum=WGS84")
 }
 
 # get the data in a tidy format and write to disk if desired
