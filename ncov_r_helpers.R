@@ -1,3 +1,7 @@
+
+# Libraries ----------
+### Libraries used are below
+# The functions are namespaced, so once the libraries are installed you can just run the function and don't have to load each library
 library(tidyverse)
 library(data.table)
 library(janitor)
@@ -7,13 +11,16 @@ library(leaflet.extras)
 library(sf)
 library(sp)
 
+
+# Time Series data feeds ----------
+
 # define the urls for the three conditions from which we'll pull in the data
 confirmed_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
 deaths_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
 recovered_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv'
 
 # this function pulls the data from individual url
-#the 'status' paramter creates a new column in the data
+# the 'status' paramter creates a new column in the data
 get_cv_data <- function(dataset_url, status) {
   cv <- data.table::fread(dataset_url) 
   cv[, Status := status]
@@ -49,3 +56,28 @@ data.table::fwrite(cv_data, "./data/coronavirus_data.csv")
 # convert to a simple features object and write out as geojson if that's your preferred format
 cv_sf <- cv_to_sf(cv_data)
 sf::st_write(cv_sf, "./data/coronavirus_data.geojson")
+
+
+
+# Daily data feed ----------
+
+# this function directly reads in the latest daily report and can be run on a schedule
+# if the data for the current date isn't available yet, it returns the previous day's data
+# the output can also be converted to sf using the cv_sf() function
+
+cv_daily <- function(){
+  current_day <- lubridate::today()
+  date_str <- paste0(format(current_day, "%m-%d-%Y"),".csv")
+  url = paste0("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/", date_str)
+  tryCatch({
+    pull <- data.table::fread(url)
+    setnames(pull, names(pull), snakecase::to_snake_case(names(pull)))
+  }, error = function(e) {
+    prev_day <- current_day-lubridate::days(1)
+    message(paste0("Data for ", current_day, " not yet available, returning data for ", prev_day))
+    date_str <- paste0(format(prev_day, "%m-%d-%Y"),".csv")
+    url = paste0("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/", date_str)
+    pull <- data.table::fread(url)
+    setnames(pull, names(pull), snakecase::to_snake_case(names(pull)))
+  })
+}
