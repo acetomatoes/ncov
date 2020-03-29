@@ -8,9 +8,9 @@ library(sf)
 library(sp)
 
 # define the urls for the three conditions from which we'll pull in the data
-confirmed_url <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
-deaths_url <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
-recovered_url <- 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv'
+confirmed_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
+deaths_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
+recovered_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv'
 
 # this function pulls the data from individual url
 #the 'status' paramter creates a new column in the data
@@ -39,9 +39,7 @@ compile_cv_data <- function() {
 
 # this adds a CRS to the cv_object and turns it to a simple features object
 cv_to_sf <- function(cv_data) {
-  sp::coordinates(cv_data) <- ~long+lat
-  sp::proj4string(cv_data) <- "+proj=longlat +ellps=WGS84 +datum=WGS84"
-  cv_sf <- sf::st_as_sf(cv_data)
+  cv_sf <- sf::st_as_sf(cv_data, coords = c("lat", "long"), crs = 4326)
   
 }
 
