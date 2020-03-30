@@ -13,7 +13,6 @@ library(sp)
 
 
 # Time Series data feeds ----------
-
 # define the urls for the three conditions from which we'll pull in the data
 confirmed_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
 deaths_url = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv'
@@ -58,26 +57,44 @@ cv_sf <- cv_to_sf(cv_data)
 sf::st_write(cv_sf, "./data/coronavirus_data.geojson")
 
 
-
 # Daily data feed ----------
-
 # this function directly reads in the latest daily report and can be run on a schedule
 # if the data for the current date isn't available yet, it returns the previous day's data
 # the output can also be converted to sf using the cv_sf() function
 
-cv_daily <- function(){
-  current_day <- lubridate::today()
-  date_str <- paste0(format(current_day, "%m-%d-%Y"),".csv")
-  url = paste0("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/", date_str)
-  tryCatch({
-    pull <- data.table::fread(url)
-    setnames(pull, names(pull), snakecase::to_snake_case(names(pull)))
-  }, error = function(e) {
-    prev_day <- current_day-lubridate::days(1)
-    message(paste0("Data for ", current_day, " not yet available, returning data for ", prev_day))
-    date_str <- paste0(format(prev_day, "%m-%d-%Y"),".csv")
+cv_daily <- function(date = Sys.Date()){
+  if(missing(date)){
+    current_day <- lubridate::today()
+    date_str <- paste0(format(current_day, "%m-%d-%Y"),".csv")
     url = paste0("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/", date_str)
-    pull <- data.table::fread(url)
-    setnames(pull, names(pull), snakecase::to_snake_case(names(pull)))
-  })
+    current_data <-  tryCatch({
+      pull <- data.table::fread(url)
+      setnames(pull, names(pull), snakecase::to_snake_case(names(pull)))
+    }, error = function(e) {
+      prev_day <- current_day-lubridate::days(1)
+      message(paste0("Data for ", current_day, " not yet available, returning data for ", prev_day))
+      date_str <- paste0(format(prev_day, "%m-%d-%Y"),".csv")
+      url = paste0("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/", date_str)
+      pull <- data.table::fread(url)
+      setnames(pull, names(pull), snakecase::to_snake_case(names(pull)))
+    })
+    return(current_data)
+  } else {
+    if(class(date) == "Date"){
+      date_str <- paste0(format(date, "%m-%d-%Y"),".csv")
+    } else {
+      date_str <- paste0(gsub("/", "-", date), ".csv")
+    }
+    url = paste0("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/", date_str) 
+    requested_data <- try({
+      pull <- data.table::fread(url)
+      setnames(pull, names(pull), snakecase::to_snake_case(names(pull)))
+    })
+    return(requested_data)
+  }
+  
 }
+
+#daily <- cv_daily("03-01-2020")
+#daily <- cv_daily("03/01/2020")
+#daily <- cv_daily(mdy("03/01/2020"))
