@@ -60,6 +60,7 @@ sf::st_write(cv_sf, "./data/coronavirus_data.geojson")
 # Daily data feed ----------
 # this function directly reads in the latest daily report and can be run on a schedule
 # if the data for the current date isn't available yet, it returns the previous day's data
+# also accepts a date as an input parameter for pulling data from previous dates
 # the output can also be converted to sf using the cv_sf() function
 
 cv_daily <- function(date = Sys.Date()){
