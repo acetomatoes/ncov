@@ -1,4 +1,4 @@
-# ncov
+# COVID-19
 Python and R scripts for collecting and consolidating the time series and daily reports datasets related to the COVID-19 pandemic.
 Data source: https://github.com/CSSEGISandData/COVID-19
 
